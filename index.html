@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ThinkNext | Student Management System</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="style.css">
+    
+</head>
+<body>
+    <!-- Loading Spinner -->
+    <div class="spinner-overlay" id="loadingSpinner">
+        <div class="spinner"></div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg gradient-bg py-3">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center text-white fw-bold fs-3" href="#">
+                <i class="bi bi-mortarboard-fill me-2"></i>
+                Think<span class="text-warning">Next</span>
+            </a>
+            <div class="d-flex align-items-center">
+                <div class="position-relative me-3">
+                    <button class="btn btn-light btn-sm rounded-circle" id="notificationBtn">
+                        <i class="bi bi-bell-fill"></i>
+                        <span class="notification-badge" id="notificationCount">0</span>
+                    </button>
+                </div>
+                <div class="dropdown">
+                    <button class="btn btn-light dropdown-toggle d-flex align-items-center" type="button" id="userDropdown" data-bs-toggle="dropdown">
+                        <div class="avatar me-2" style="background: var(--gradient-primary);">AD</div>
+                        <span class="text-dark fw-medium">Admin</span>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><a class="dropdown-item" href="#" id="profileBtn"><i class="bi bi-person-circle me-2"></i>Profile</a></li>
+                        <li><a class="dropdown-item" href="#" id="settingsBtn"><i class="bi bi-gear me-2"></i>Settings</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item text-danger" href="#" id="logoutBtn"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container my-4">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-lg-3 mb-4">
+                <div class="sidebar p-4">
+                    <div class="mb-4">
+                        <h5 class="fw-bold text-primary">Dashboard</h5>
+                        <p class="text-muted small" id="currentDateTime">Loading...</p>
+                    </div>
+                    
+                    <ul class="nav flex-column mb-4">
+                        <li class="nav-item">
+                            <a class="nav-link active" href="#" data-view="dashboard">
+                                <i class="bi bi-speedometer2 me-2"></i> Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" data-view="students">
+                                <i class="bi bi-people me-2"></i> Students
+                                <span class="badge bg-primary float-end" id="studentCount">0</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" data-view="attendance">
+                                <i class="bi bi-calendar-check me-2"></i> Attendance
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" data-view="courses">
+                                <i class="bi bi-book me-2"></i> Courses
+                                <span class="badge bg-success float-end" id="courseCount">0</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" data-view="addStudent">
+                                <i class="bi bi-person-plus me-2"></i> Add Student
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" data-view="reports">
+                                <i class="bi bi-graph-up me-2"></i> Reports
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" data-view="calendar">
+                                <i class="bi bi-calendar-week me-2"></i> Calendar
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" data-view="chat">
+                                <i class="bi bi-chat-left-text me-2"></i> Group Chat
+                                <span class="badge bg-danger float-end" id="messageCount">0</span>
+                            </a>
+                        </li>
+                    </ul>
+
+                    <div class="mt-4 pt-4 border-top">
+                        <h6 class="fw-bold text-primary mb-3">Quick Actions</h6>
+                        <button class="btn btn-custom w-100 mb-2" id="markAttendanceBtn">
+                            <i class="bi bi-calendar-plus me-2"></i> Mark Attendance
+                        </button>
+                        <button class="btn btn-success-custom w-100 mb-2" id="exportDataBtn">
+                            <i class="bi bi-download me-2"></i> Export Data
+                        </button>
+                        <button class="btn btn-warning-custom w-100" id="sendNotificationBtn">
+                            <i class="bi bi-bell me-2"></i> Send Notification
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="col-lg-9">
+                <!-- Dashboard View -->
+                <div class="view-content active" id="dashboardView">
+                    <div class="header">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h3 class="fw-bold mb-1">Welcome back, Admin!</h3>
+                                <p class="text-muted mb-0">Here's what's happening with your students today.</p>
+                            </div>
+                            <div>
+                                <span class="badge bg-primary p-2" id="currentDate"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Stats Cards -->
+                    <div class="row mb-4">
+                        <div class="col-md-6 col-lg-3">
+                            <div class="stat-card gradient-info">
+                                <i class="bi bi-people"></i>
+                                <div class="number" id="totalStudents">0</div>
+                                <div>Total Students</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 col-lg-3">
+                            <div class="stat-card gradient-success">
+                                <i class="bi bi-calendar-check"></i>
+                                <div class="number" id="attendanceRate">0%</div>
+                                <div>Attendance Rate</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 col-lg-3">
+                            <div class="stat-card gradient-warning">
+                                <i class="bi bi-book"></i>
+                                <div class="number" id="activeCourses">0</div>
+                                <div>Active Courses</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 col-lg-3">
+                            <div class="stat-card gradient-danger">
+                                <i class="bi bi-exclamation-triangle"></i>
+                                <div class="number" id="pendingTasks">0</div>
+                                <div>Pending Tasks</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Charts Row -->
+                    <div class="row mb-4">
+                        <div class="col-lg-8">
+                            <div class="chart-container">
+                                <h5 class="fw-bold mb-3">Monthly Attendance Trend</h5>
+                                <canvas id="attendanceChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="col-lg-4">
+                            <div class="chart-container">
+                                <h5 class="fw-bold mb-3">Course Distribution</h5>
+                                <canvas id="courseChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recent Activity -->
+                    <div class="row">
+                        <div class="col-lg-6 mb-4">
+                            <div class="table-container">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h5 class="fw-bold mb-0">Recent Students</h5>
+                                    <a href="#" class="text-primary small" data-view="students">View All</a>
+                                </div>
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>Name</th>
+                                                <th>Course</th>
+                                                <th>Join Date</th>
+                                                <th>Status</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="recentStudentsTable">
+                                            <!-- Will be populated by JavaScript -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6 mb-4">
+                            <div class="table-container">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h5 class="fw-bold mb-0">Today's Attendance</h5>
+                                    <button class="btn btn-sm btn-custom" id="markAllPresentBtn">Mark All Present</button>
+                                </div>
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>Name</th>
+                                                <th>Course</th>
+                                                <th>Time</th>
+                                                <th>Status</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="todaysAttendanceTable">
+                                            <!-- Will be populated by JavaScript -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Students View -->
+                <div class="view-content" id="studentsView">
+                    <div class="header">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h3 class="fw-bold mb-1">Student Management</h3>
+                                <p class="text-muted mb-0">Manage all student records and information.</p>
+                            </div>
+                            <button class="btn btn-custom" data-view="addStudent">
+                                <i class="bi bi-person-plus me-2"></i> Add New Student
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Filter Box -->
+                    <div class="filter-box mb-4">
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <input type="text" class="form-control search-box" id="studentSearch" placeholder="Search students...">
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <select class="form-select" id="courseFilter">
+                                    <option value="">All Courses</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <select class="form-select" id="statusFilter">
+                                    <option value="">All Status</option>
+                                    <option value="Active">Active</option>
+                                    <option value="Inactive">Inactive</option>
+                                    <option value="Completed">Completed</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2 mb-3">
+                                <button class="btn btn-custom w-100" id="resetFilterBtn">Reset</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="table-container">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Student</th>
+                                        <th>Contact</th>
+                                        <th>Course</th>
+                                        <th>Join Date</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="allStudentsTable">
+                                    <!-- Will be populated by JavaScript -->
+                                </tbody>
+                            </table>
+                        </div>
+                        <!-- Pagination -->
+                        <nav aria-label="Student pagination">
+                            <ul class="pagination pagination-custom justify-content-center" id="studentPagination">
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+
+                <!-- Add Student View -->
+                <div class="view-content" id="addStudentView">
+                    <div class="header">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h3 class="fw-bold mb-1">Add New Student</h3>
+                                <p class="text-muted mb-0">Fill in the details to add a new student.</p>
+                            </div>
+                            <button class="btn btn-outline-primary" data-view="students">
+                                <i class="bi bi-arrow-left me-2"></i> Back to Students
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="table-container">
+                        <form id="addStudentForm">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="studentName" class="form-label fw-medium">Full Name *</label>
+                                    <input type="text" class="form-control" id="studentName" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="studentEmail" class="form-label fw-medium">Email Address *</label>
+                                    <input type="email" class="form-control" id="studentEmail" required>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="studentPhone" class="form-label fw-medium">Phone Number *</label>
+                                    <input type="tel" class="form-control" id="studentPhone" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="studentCourse" class="form-label fw-medium">Course *</label>
+                                    <select class="form-select" id="studentCourse" required>
+                                        <option value="">Select a course</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="joiningDate" class="form-label fw-medium">Joining Date *</label>
+                                    <input type="date" class="form-control" id="joiningDate" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="studentStatus" class="form-label fw-medium">Status *</label>
+                                    <select class="form-select" id="studentStatus" required>
+                                        <option value="Active">Active</option>
+                                        <option value="Inactive">Inactive</option>
+                                        <option value="Completed">Completed</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="studentAddress" class="form-label fw-medium">Address</label>
+                                <textarea class="form-control" id="studentAddress" rows="3"></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label for="studentNotes" class="form-label fw-medium">Additional Notes</label>
+                                <textarea class="form-control" id="studentNotes" rows="3" placeholder="Any additional information about the student..."></textarea>
+                            </div>
+                            <div class="d-flex justify-content-end gap-3">
+                                <button type="reset" class="btn btn-outline-secondary">Reset</button>
+                                <button type="submit" class="btn btn-custom">
+                                    <i class="bi bi-save me-2"></i> Add Student
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Attendance View -->
+                <div class="view-content" id="attendanceView">
+                    <div class="header">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h3 class="fw-bold mb-1">Attendance Management</h3>
+                                <p class="text-muted mb-0">Track and manage student attendance records.</p>
+                            </div>
+                            <div>
+                                <button class="btn btn-custom me-2" id="filterAttendanceBtn">
+                                    <i class="bi bi-filter me-2"></i> Filter
+                                </button>
+                                <button class="btn btn-success-custom" id="markAttendanceBtn2">
+                                    <i class="bi bi-calendar-plus me-2"></i> Mark Attendance
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Attendance Filter -->
+                    <div class="filter-box mb-4" id="attendanceFilter" style="display: none;">
+                        <div class="row">
+                            <div class="col-md-3 mb-3">
+                                <label for="attendanceDateFilter" class="form-label">Date</label>
+                                <input type="date" class="form-control" id="attendanceDateFilter">
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label for="attendanceCourseFilter" class="form-label">Course</label>
+                                <select class="form-select" id="attendanceCourseFilter">
+                                    <option value="">All Courses</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label for="attendanceStatusFilter" class="form-label">Status</label>
+                                <select class="form-select" id="attendanceStatusFilter">
+                                    <option value="">All Status</option>
+                                    <option value="Present">Present</option>
+                                    <option value="Absent">Absent</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3 mb-3 d-flex align-items-end">
+                                <button class="btn btn-custom w-100" id="applyAttendanceFilter">Apply Filter</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="table-container">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Student ID</th>
+                                        <th>Name</th>
+                                        <th>Course</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="attendanceTable">
+                                    <!-- Will be populated by JavaScript -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Courses View -->
+                <div class="view-content" id="coursesView">
+                    <div class="header">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h3 class="fw-bold mb-1">Course Management</h3>
+                                <p class="text-muted mb-0">Manage all available courses and their details.</p>
+                            </div>
+                            <button class="btn btn-custom" id="addCourseBtn">
+                                <i class="bi bi-plus-circle me-2"></i> Add Course
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="row" id="courseCardsContainer">
+                        <!-- Will be populated by JavaScript -->
+                    </div>
+                </div>
+
+                <!-- Reports View -->
+                <div class="view-content" id="reportsView">
+                    <div class="header">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h3 class="fw-bold mb-1">Reports & Analytics</h3>
+                                <p class="text-muted mb-0">Detailed insights and analytics for ThinkNext.</p>
+                            </div>
+                            <div>
+                                <button class="btn btn-outline-primary me-2" id="printReportBtn">
+                                    <i class="bi bi-printer me-2"></i> Print
+                                </button>
+                                <button class="btn btn-custom" id="exportReportBtn">
+                                    <i class="bi bi-download me-2"></i> Export
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mb-4">
+                        <div class="col-lg-8">
+                            <div class="chart-container">
+                                <h5 class="fw-bold mb-3">Student Growth</h5>
+                                <canvas id="growthChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="col-lg-4">
+                            <div class="chart-container">
+                                <h5 class="fw-bold mb-3">Attendance Summary</h5>
+                                <canvas id="attendanceSummaryChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-lg-6 mb-4">
+                            <div class="table-container">
+                                <h5 class="fw-bold mb-3">Top Performing Students</h5>
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>Student</th>
+                                                <th>Course</th>
+                                                <th>Attendance %</th>
+                                                <th>Performance</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="topStudentsTable">
+                                            <!-- Will be populated by JavaScript -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6 mb-4">
+                            <div class="table-container">
+                                <h5 class="fw-bold mb-3">Course Statistics</h5>
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>Course</th>
+                                                <th>Students</th>
+                                                <th>Attendance %</th>
+                                                <th>Completion Rate</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="courseStatsTable">
+                                            <!-- Will be populated by JavaScript -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Calendar View -->
+                <div class="view-content" id="calendarView">
+                    <div class="header">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h3 class="fw-bold mb-1">Academic Calendar</h3>
+                                <p class="text-muted mb-0">View and manage important dates and events.</p>
+                            </div>
+                            <button class="btn btn-custom" id="addEventBtn">
+                                <i class="bi bi-plus-circle me-2"></i> Add Event
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="table-container">
+                        <div id="calendar"></div>
+                    </div>
+                </div>
+
+                <!-- Group Chat View -->
+                <div class="view-content" id="chatView">
+                    <div class="header">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h3 class="fw-bold mb-1">Group Chat</h3>
+                                <p class="text-muted mb-0">Communicate with students and staff in groups.</p>
+                            </div>
+                            <button class="btn btn-custom" id="createGroupBtn">
+                                <i class="bi bi-plus-circle me-2"></i> Create Group
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="chat-container">
+                        <div class="chat-sidebar" id="chatSidebar">
+                            <!-- Group list will be loaded here -->
+                        </div>
+                        <div class="chat-main" id="chatMain">
+                            <div class="chat-header">
+                                <h5 class="mb-0" id="currentGroupName">Select a group to start chatting</h5>
+                                <p class="mb-0 small" id="currentGroupMembers">0 members</p>
+                            </div>
+                            <div class="chat-messages" id="chatMessages">
+                                <div class="text-center py-5">
+                                    <i class="bi bi-chat-left-text display-4 text-muted"></i>
+                                    <p class="mt-3 text-muted">Select a group to view messages</p>
+                                </div>
+                            </div>
+                            <div class="chat-input" id="chatInput" style="display: none;">
+                                <div class="input-group">
+                                    <input type="text" class="form-control" id="messageInput" placeholder="Type your message...">
+                                    <button class="btn btn-custom" id="sendMessageBtn">
+                                        <i class="bi bi-send"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="gradient-bg text-white py-4 mt-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5 class="fw-bold">ThinkNext Student Management</h5>
+                    <p class="mb-0">© 2023 ThinkNext Technologies. All rights reserved.</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <p class="mb-0">
+                        <i class="bi bi-telephone me-2"></i> +91 1234567890 | 
+                        <i class="bi bi-envelope ms-3 me-2"></i> info@thinknext.com
+                    </p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Modals -->
+    <!-- Mark Attendance Modal -->
+    <div class="modal fade" id="attendanceModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header gradient-bg text-white">
+                    <h5 class="modal-title">Mark Attendance - <span id="modalDate"></span></h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Student ID</th>
+                                    <th>Name</th>
+                                    <th>Course</th>
+                                    <th>Attendance</th>
+                                </tr>
+                            </thead>
+                            <tbody id="attendanceModalTable">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-success-custom" id="saveAttendanceBtn">Save Attendance</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Course Modal -->
+    <div class="modal fade" id="addCourseModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header gradient-bg text-white">
+                    <h5 class="modal-title">Add New Course</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addCourseForm">
+                        <div class="mb-3">
+                            <label for="courseName" class="form-label">Course Name *</label>
+                            <input type="text" class="form-control" id="courseName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="courseDuration" class="form-label">Duration *</label>
+                            <input type="text" class="form-control" id="courseDuration" placeholder="e.g., 3 months" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="courseDescription" class="form-label">Description</label>
+                            <textarea class="form-control" id="courseDescription" rows="3"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="courseFee" class="form-label">Course Fee</label>
+                            <input type="number" class="form-control" id="courseFee">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-custom" id="saveCourseBtn">Add Course</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Modal -->
+    <div class="modal fade" id="notificationModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header gradient-bg text-white">
+                    <h5 class="modal-title">Notifications</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="notificationList">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-custom" id="markAllReadBtn">Mark All as Read</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Send Notification Modal -->
+    <div class="modal fade" id="sendNotificationModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header gradient-bg text-white">
+                    <h5 class="modal-title">Send Notification</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="sendNotificationForm">
+                        <div class="mb-3">
+                            <label for="notificationRecipient" class="form-label">Recipient</label>
+                            <select class="form-select" id="notificationRecipient">
+                                <option value="all">All Students</option>
+                                <option value="course">Specific Course</option>
+                                <option value="student">Specific Student</option>
+                            </select>
+                        </div>
+                        <div class="mb-3" id="courseSelectContainer" style="display: none;">
+                            <label for="notificationCourse" class="form-label">Select Course</label>
+                            <select class="form-select" id="notificationCourse">
+                            </select>
+                        </div>
+                        <div class="mb-3" id="studentSelectContainer" style="display: none;">
+                            <label for="notificationStudent" class="form-label">Select Student</label>
+                            <select class="form-select" id="notificationStudent">
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="notificationTitle" class="form-label">Title *</label>
+                            <input type="text" class="form-control" id="notificationTitle" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="notificationMessage" class="form-label">Message *</label>
+                            <textarea class="form-control" id="notificationMessage" rows="4" required></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-custom" id="sendNotificationConfirmBtn">Send Notification</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Group Modal -->
+    <div class="modal fade" id="createGroupModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header gradient-bg text-white">
+                    <h5 class="modal-title">Create New Group</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="createGroupForm">
+                        <div class="mb-3">
+                            <label for="groupName" class="form-label">Group Name *</label>
+                            <input type="text" class="form-control" id="groupName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="groupDescription" class="form-label">Description</label>
+                            <textarea class="form-control" id="groupDescription" rows="3"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="groupMembers" class="form-label">Add Members</label>
+                            <div id="groupMembersList" class="border rounded p-3" style="max-height: 200px; overflow-y: auto;">
+                                <!-- Students will be loaded here -->
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-custom" id="saveGroupBtn">Create Group</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Event Modal -->
+    <div class="modal fade" id="addEventModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header gradient-bg text-white">
+                    <h5 class="modal-title">Add New Event</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addEventForm">
+                        <div class="mb-3">
+                            <label for="eventTitle" class="form-label">Event Title *</label>
+                            <input type="text" class="form-control" id="eventTitle" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="eventDate" class="form-label">Date *</label>
+                            <input type="date" class="form-control" id="eventDate" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="eventCourse" class="form-label">Related Course</label>
+                            <select class="form-select" id="eventCourse">
+                                <option value="">All Courses</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="eventDescription" class="form-label">Description</label>
+                            <textarea class="form-control" id="eventDescription" rows="3"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-custom" id="saveEventBtn">Add Event</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Student Modal -->
+    <div class="modal fade" id="editStudentModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header gradient-bg text-white">
+                    <h5 class="modal-title">Edit Student</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editStudentForm">
+                        <input type="hidden" id="editStudentId">
+                        <div class="mb-3">
+                            <label for="editStudentName" class="form-label">Full Name *</label>
+                            <input type="text" class="form-control" id="editStudentName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editStudentEmail" class="form-label">Email Address *</label>
+                            <input type="email" class="form-control" id="editStudentEmail" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editStudentPhone" class="form-label">Phone Number *</label>
+                            <input type="tel" class="form-control" id="editStudentPhone" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editStudentCourse" class="form-label">Course *</label>
+                            <select class="form-select" id="editStudentCourse" required>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editStudentStatus" class="form-label">Status *</label>
+                            <select class="form-select" id="editStudentStatus" required>
+                                <option value="Active">Active</option>
+                                <option value="Inactive">Inactive</option>
+                                <option value="Completed">Completed</option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-custom" id="updateStudentBtn">Update Student</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js.js"></script>
+</body>
+</html>
